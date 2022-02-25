@@ -29,13 +29,13 @@ const ELEMENT_DATA: PeriodicElement[] = [
   styleUrls: ['./table.component.css']
 })
 
-export class TableComponent {
-  dispdisplayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
+export class TableComponent implements AfterViewInit{
+  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
   dataSource = new MatTableDataSource(ELEMENT_DATA);
-  
+
   constructor(private _liveAnnouncer: LiveAnnouncer) {}
 
-  @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatSort) sort = new MatSort();
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
