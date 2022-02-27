@@ -13,6 +13,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { FilterPipe } from './table/filter.pipe';
 import { FormsModule } from '@angular/forms';
+import {MatIconModule} from '@angular/material/icon';
 @NgModule({
   declarations: [
     AppComponent,
@@ -30,7 +31,8 @@ import { FormsModule } from '@angular/forms';
     MatProgressSpinnerModule,
     MatPaginatorModule,
     MatAutocompleteModule,
-    FormsModule
+    FormsModule,
+    MatIconModule
   ],
   providers: [FilterPipe],
   bootstrap: [AppComponent]

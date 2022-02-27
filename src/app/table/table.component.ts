@@ -1,7 +1,10 @@
+import { FunctionExpr } from '@angular/compiler';
 import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
 import { MatTableDataSource } from '@angular/material/table';
+import { resultMemoize } from '@ngrx/store';
+import { AnyFn } from '@ngrx/store/src/selector';
 import { BankService } from '../bank.service';
 import { BankDetails } from '../Model/bank-details.model';
 import { BankFilter } from '../Model/bankFilter.model';
@@ -17,14 +20,17 @@ interface City {
   styleUrls: ['./table.component.css']
 })
 
-export class TableComponent implements OnInit, OnChanges{
+export class TableComponent implements OnInit {
   @ViewChild(MatPaginator, { static: false })paginator!: MatPaginator;
   selected: string;
-  displayedColumns: string[] = ['ifsc', 'bank_id', 'branch', 'address', 'city', 'district', 'state', 'bank_name'];
+  displayedColumns: string[] = ['favorite','ifsc', 'bank_id', 'branch', 'address', 'city', 'district', 'state', 'bank_name'];
   dataSource: any;
   dataSourceFilters: any;
   data: BankDetails[] = [];
   searchText = '';
+  toggle = true;
+  status = 'Enable'; 
+  selectedUser : any;
   cities: City[] = [
     { value: 'MUMBAI', viewValue: 'Mumbai' },
     { value: 'VADODARA', viewValue: 'Vadodara' },
@@ -54,7 +60,6 @@ export class TableComponent implements OnInit, OnChanges{
 
 
       this.dataSourceFilters.filterPredicate = function (record:any, filteer:any) {
-        debugger;
         var map = new Map(JSON.parse(filteer));
         let isMatch = false;
         for (let [key, value] of map) {
@@ -67,13 +72,10 @@ export class TableComponent implements OnInit, OnChanges{
 
   applyEmpFilter(ob: MatSelectChange, bankfilter: BankFilter) {
     this.filterDictionary.set(bankfilter.bankname, ob.value);
-
     var jsonString = JSON.stringify(
       Array.from(this.filterDictionary.entries())
     );
-
     this.dataSourceFilters.filter = jsonString;
-    //console.log(this.filterValues);
   }
 
   applyFilter(event: Event) {
@@ -85,14 +87,18 @@ export class TableComponent implements OnInit, OnChanges{
     this.getBankDetails(this.selected);
   }
 
-  ngOnChanges(){
-    this.getBankDetails(this.selected);
-  }
-
   onSelectionChanged(ci:string, event: any) {
     if (event.isUserInput) { 
       this.getBankDetails(ci);
     }
+  }
+
+  activeSkill(element:any) {
+    let user1 = [];
+    this.selectedUser = element;
+    console.log(element)
+    this.bankService.setUserInfoInLocalStorage(element)
+    console.log(this.bankService.getUserInfoFromLocalStorage("favourite"))
   }
 
   displayFn(ci: string){
@@ -101,14 +107,22 @@ export class TableComponent implements OnInit, OnChanges{
   private getBankDetails(city: string) {
     this.bankService.getBankData(city).subscribe((response) => {
       this.data = response as BankDetails[];
-      console.log(this.data);
       this.dataSource = new MatTableDataSource(this.data);
       this.dataSource.paginator = this.paginator;
-      const filtered = this.filterr.transform(this.data,this.searchText);
       this.dataSourceFilters = new MatTableDataSource(this.data);
-      console.log(filtered);
       this.cdr.detectChanges();
     })
   }
+
+  // memoize = function <T = any>(fn: Func<T>) {
+  //   const cache = new Map();
+  //   const cached = function (this: any, val: T): any {
+  //     return cache.has(val)
+  //       ? cache.get(val)
+  //       : cache.set(val, fn.call(this, val)) && cache.get(val);
+  //   };
+  //   cached.cache = cache;
+  //   return cached;
+  // };
 }
 
