@@ -11,8 +11,7 @@
 </mat-form-field>
 </span>
 <span class="col-8 md-form mt-2">
-  <input #search1 id="search1" placeholder="Search" [(ngModel)]="searchText" (ngModelChange)="grid.findNext(searchText, caseSensitive, exactMatch)"
-  (keydown)="searchKeyDown($event)" />
+  <input matInput (keyup)="applyFilter($event)" placeholder="Search Columns" #input/>
 </span>
 </div>
 <div class="mat-elevation-z8">

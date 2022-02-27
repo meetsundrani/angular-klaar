@@ -1,19 +1,11 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges, Input, EventEmitter, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSelectChange } from '@angular/material/select';
 import { MatTableDataSource } from '@angular/material/table';
 import { BankService } from '../bank.service';
-
-export interface BankDetails {
-  ifsc: string;
-  bank_id: number;
-  branch: string;
-  address: string;
-  city: string;
-  district: string;
-  state: string;
-  bank_name: string;
-}
-
+import { BankDetails } from '../Model/bank-details.model';
+import { BankFilter } from '../Model/bankFilter.model';
+import { FilterPipe } from './filter.pipe';
 interface City {
   value: string;
   viewValue: string;
@@ -27,15 +19,12 @@ interface City {
 
 export class TableComponent implements OnInit, OnChanges{
   @ViewChild(MatPaginator, { static: false })paginator!: MatPaginator;
-  @ViewChild('#myTab', { static: true }) public grid = new ElementRef('#myTab');
   selected: string;
-  public searchText = '';
-  public caseSensitive = false;
-  public exactMatch = false;
   displayedColumns: string[] = ['ifsc', 'bank_id', 'branch', 'address', 'city', 'district', 'state', 'bank_name'];
   dataSource: any;
+  dataSourceFilters: any;
   data: BankDetails[] = [];
-  displayLoader = true;
+  searchText = '';
   cities: City[] = [
     { value: 'MUMBAI', viewValue: 'Mumbai' },
     { value: 'VADODARA', viewValue: 'Vadodara' },
@@ -45,13 +34,51 @@ export class TableComponent implements OnInit, OnChanges{
     { value: 'PANVEL', viewValue: 'Panvel' }
   ];
 
+  citiess: string[]=['MUMBAI','VADODARA','PUNE','KALYAN','THANE','PANVEL'];
+  states: string[]=['MAHARASHTRA','GUJARAT'];
+  bkFilters: BankFilter[]=[];
+  
+  defaultValue = "All";
 
-  constructor(private cdr: ChangeDetectorRef, private bankService: BankService) {
+  filterDictionary= new Map<string,string>();
+
+
+  constructor(private cdr: ChangeDetectorRef, private bankService: BankService, private filterr: FilterPipe) {
     this.selected = this.cities[0].value;
   }
 
   ngOnInit() {
       this.getData();
+      this.bkFilters.push({bankname:'city',options:this.citiess,defaultValue:this.defaultValue});
+      this.bkFilters.push({bankname:'state',options:this.states,defaultValue:this.defaultValue});
+
+
+      this.dataSourceFilters.filterPredicate = function (record:any, filteer:any) {
+        debugger;
+        var map = new Map(JSON.parse(filteer));
+        let isMatch = false;
+        for (let [key, value] of map) {
+          isMatch = value == 'All' || record[key as keyof BankDetails] == value;
+          if (!isMatch) return false;
+        }
+        return isMatch;
+      };
+  }
+
+  applyEmpFilter(ob: MatSelectChange, bankfilter: BankFilter) {
+    this.filterDictionary.set(bankfilter.bankname, ob.value);
+
+    var jsonString = JSON.stringify(
+      Array.from(this.filterDictionary.entries())
+    );
+
+    this.dataSourceFilters.filter = jsonString;
+    //console.log(this.filterValues);
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   getData(){
@@ -77,7 +104,10 @@ export class TableComponent implements OnInit, OnChanges{
       console.log(this.data);
       this.dataSource = new MatTableDataSource(this.data);
       this.dataSource.paginator = this.paginator;
-      // this.cdr.detectChanges();
+      const filtered = this.filterr.transform(this.data,this.searchText);
+      this.dataSourceFilters = new MatTableDataSource(this.data);
+      console.log(filtered);
+      this.cdr.detectChanges();
     })
   }
 }
