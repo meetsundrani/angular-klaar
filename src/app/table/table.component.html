@@ -2,20 +2,21 @@
 <div class="row">
 <span class="col-4">
 <mat-form-field appearance="fill">
-  <mat-label>Select city</mat-label>
-  <mat-select>
-    <mat-option id="city" *ngFor="let city of cities" [value]="city.value" (onSelectionChange)="onSelectChange(city.value)">
+   <mat-label>Select an option</mat-label>
+   <mat-select [(value)]="selected">
+    <mat-option id="city" *ngFor="let city of cities" [value]="city.value" (onSelectionChange)="onSelectionChanged(city.value,$event)">
       {{city.viewValue}}
     </mat-option>
   </mat-select>
 </mat-form-field>
 </span>
 <span class="col-8 md-form mt-2">
-    <input class="form-control mr-sm-2" type="text" placeholder="Search">
+  <input #search1 id="search1" placeholder="Search" [(ngModel)]="searchText" (ngModelChange)="grid.findNext(searchText, caseSensitive, exactMatch)"
+  (keydown)="searchKeyDown($event)" />
 </span>
 </div>
 <div class="mat-elevation-z8">
-  <table mat-table [dataSource]="dataSource">
+  <table mat-table [dataSource]="dataSource" id="myTab">
 
     <!-- Position Column -->
   <ng-container matColumnDef="ifsc">
@@ -84,7 +85,7 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 
-  <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+  <mat-paginator [pageSizeOptions]="[10, 20, 50, 100]"
                  showFirstLastButtons 
                  aria-label="Select page of Bank Details">
   </mat-paginator>

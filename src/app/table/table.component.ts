@@ -1,7 +1,8 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
-import {MatPaginator} from '@angular/material/paginator';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges, Input, EventEmitter, ElementRef } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { BankService } from '../bank.service';
+
 export interface BankDetails {
   ifsc: string;
   bank_id: number;
@@ -24,11 +25,15 @@ interface City {
   styleUrls: ['./table.component.css']
 })
 
-export class TableComponent implements AfterViewInit, OnInit {
+export class TableComponent implements OnInit, OnChanges{
   @ViewChild(MatPaginator, { static: false })paginator!: MatPaginator;
+  @ViewChild('#myTab', { static: true }) public grid = new ElementRef('#myTab');
+  selected: string;
+  public searchText = '';
+  public caseSensitive = false;
+  public exactMatch = false;
   displayedColumns: string[] = ['ifsc', 'bank_id', 'branch', 'address', 'city', 'district', 'state', 'bank_name'];
   dataSource: any;
-  city = "MUMBAI";
   data: BankDetails[] = [];
   displayLoader = true;
   cities: City[] = [
@@ -40,32 +45,39 @@ export class TableComponent implements AfterViewInit, OnInit {
     { value: 'PANVEL', viewValue: 'Panvel' }
   ];
 
+
   constructor(private cdr: ChangeDetectorRef, private bankService: BankService) {
+    this.selected = this.cities[0].value;
   }
+
   ngOnInit() {
-    this.getData();
+      this.getData();
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
+  getData(){
+    this.getBankDetails(this.selected);
   }
 
-  getData() {
-    this.getBankDetails(this.city);
+  ngOnChanges(){
+    this.getBankDetails(this.selected);
   }
 
-  onSelectChange(ci: string) {
-    this.city = ci;
-    this.getData();
+  onSelectionChanged(ci:string, event: any) {
+    if (event.isUserInput) { 
+      this.getBankDetails(ci);
+    }
   }
 
-
+  displayFn(ci: string){
+    return ci;
+  }
   private getBankDetails(city: string) {
     this.bankService.getBankData(city).subscribe((response) => {
       this.data = response as BankDetails[];
       console.log(this.data);
       this.dataSource = new MatTableDataSource(this.data);
-      this.cdr.detectChanges();
+      this.dataSource.paginator = this.paginator;
+      // this.cdr.detectChanges();
     })
   }
 }
