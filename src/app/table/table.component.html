@@ -1,3 +1,4 @@
+<div class="overlay"><div class="center">  <mat-progress-spinner mode="indeterminate" *ngIf="displayLoader" class="overlay spinner-wrapper"> </mat-progress-spinner></div></div>
 <div class="container-fluid mt-5">
   <p>Bank Branches</p>
 <div class="row">
@@ -92,7 +93,6 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-
   <mat-paginator [pageSizeOptions]="[10, 20, 50, 100]"
                  showFirstLastButtons 
                  aria-label="Select page of Bank Details">

@@ -1,14 +1,11 @@
-import { FunctionExpr } from '@angular/compiler';
-import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges} from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef} from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
 import { MatTableDataSource } from '@angular/material/table';
-import { resultMemoize } from '@ngrx/store';
-import { AnyFn } from '@ngrx/store/src/selector';
 import { BankService } from '../bank.service';
 import { BankDetails } from '../Model/bank-details.model';
 import { BankFilter } from '../Model/bankFilter.model';
-import { FilterPipe } from './filter.pipe';
+
 interface City {
   value: string;
   viewValue: string;
@@ -29,6 +26,7 @@ export class TableComponent implements OnInit {
   data: BankDetails[] = [];
   searchText = '';
   toggle = true;
+  displayLoader = false;
   status = 'Enable'; 
   selectedUser : any;
   cities: City[] = [
@@ -49,7 +47,7 @@ export class TableComponent implements OnInit {
   filterDictionary= new Map<string,string>();
 
 
-  constructor(private cdr: ChangeDetectorRef, private bankService: BankService, private filterr: FilterPipe) {
+  constructor(private cdr: ChangeDetectorRef, private bankService: BankService) {
     this.selected = this.cities[0].value;
   }
 
@@ -105,12 +103,14 @@ export class TableComponent implements OnInit {
     return ci;
   }
   private getBankDetails(city: string) {
+    this.displayLoader = true;
     this.bankService.getBankData(city).subscribe((response) => {
       this.data = response as BankDetails[];
       this.dataSource = new MatTableDataSource(this.data);
       this.dataSource.paginator = this.paginator;
       this.dataSourceFilters = new MatTableDataSource(this.data);
       this.cdr.detectChanges();
+      this.displayLoader = false;
     })
   }
 

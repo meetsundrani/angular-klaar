@@ -11,14 +11,14 @@ import { HttpClientModule } from '@angular/common/http';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import { FilterPipe } from './table/filter.pipe';
 import { FormsModule } from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
+import { LoaderComponent } from './loader.component';
 @NgModule({
   declarations: [
     AppComponent,
     TableComponent,
-    FilterPipe
+    LoaderComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +34,7 @@ import {MatIconModule} from '@angular/material/icon';
     FormsModule,
     MatIconModule
   ],
-  providers: [FilterPipe],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
